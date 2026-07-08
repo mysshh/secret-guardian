@@ -12,10 +12,34 @@ export function StatCards({ filesScanned, leaks, falsePositives }: Props) {
   const active = leaks.filter((l) => l.liveStatus === "Active Threat" && !l.fixed).length;
 
   const cards = [
-    { label: "Files Scanned", value: filesScanned, icon: FileSearch, color: "text-sky-400", ring: "ring-sky-500/20" },
-    { label: "Secrets Found", value: found, icon: ShieldAlert, color: "text-amber-400", ring: "ring-amber-500/20" },
-    { label: "Active Threats", value: active, icon: Zap, color: "text-red-400", ring: "ring-red-500/20" },
-    { label: "False Positives Filtered", value: falsePositives, icon: Filter, color: "text-emerald-400", ring: "ring-emerald-500/20" },
+    {
+      label: "Files Scanned",
+      value: filesScanned,
+      icon: FileSearch,
+      tint: "bg-[oklch(0.94_0.04_155)] text-[oklch(0.4_0.08_155)]",
+      accent: "text-[oklch(0.45_0.1_155)]",
+    },
+    {
+      label: "Secrets Found",
+      value: found,
+      icon: ShieldAlert,
+      tint: "bg-[oklch(0.93_0.06_60)] text-[oklch(0.42_0.1_50)]",
+      accent: "text-[oklch(0.48_0.13_45)]",
+    },
+    {
+      label: "Active Threats",
+      value: active,
+      icon: Zap,
+      tint: "bg-[oklch(0.9_0.07_25)] text-[oklch(0.42_0.15_25)]",
+      accent: "text-[oklch(0.52_0.18_25)]",
+    },
+    {
+      label: "Noise Filtered",
+      value: falsePositives,
+      icon: Filter,
+      tint: "bg-[oklch(0.92_0.06_180)] text-[oklch(0.38_0.08_190)]",
+      accent: "text-[oklch(0.45_0.09_190)]",
+    },
   ];
 
   return (
@@ -23,13 +47,17 @@ export function StatCards({ filesScanned, leaks, falsePositives }: Props) {
       {cards.map((c) => (
         <div
           key={c.label}
-          className={`rounded-lg border border-border bg-card p-5 ring-1 ${c.ring} hover-scale`}
+          className="rounded-3xl bg-card p-5 soft-shadow inner-glow border border-border/40 transition-transform hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{c.label}</span>
-            <c.icon className={`w-5 h-5 ${c.color}`} />
+            <span className={`inline-flex items-center justify-center w-10 h-10 rounded-2xl ${c.tint}`}>
+              <c.icon className="w-5 h-5" />
+            </span>
+            <span className="text-xs text-muted-foreground">{c.label}</span>
           </div>
-          <div className={`mt-3 text-3xl font-bold tabular-nums ${c.color}`}>{c.value}</div>
+          <div className={`mt-4 text-3xl font-display font-semibold tabular-nums ${c.accent}`}>
+            {c.value}
+          </div>
         </div>
       ))}
     </div>
