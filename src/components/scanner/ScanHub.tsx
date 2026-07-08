@@ -5,7 +5,7 @@ import { MOCK_LEAKS, SCAN_STEPS, type Leak } from "@/lib/mock-data";
 import { Console } from "./Console";
 import { StatCards } from "./StatCards";
 import { LeakTable } from "./LeakTable";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { GitBranch, Upload, Play, ShieldCheck } from "lucide-react";
 
 type Mode = "precommit" | "full";
@@ -82,6 +82,8 @@ export function ScanHub() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Toaster theme="dark" position="bottom-right" />
+
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
