@@ -81,7 +81,7 @@ export function ScanHub() {
   const onUpload = () => toast("Mock upload accepted — 12 files staged");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="dark min-h-screen bg-background text-foreground">
       <Toaster theme="dark" position="bottom-right" />
 
       {/* Header */}
