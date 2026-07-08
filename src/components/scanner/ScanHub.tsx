@@ -6,7 +6,7 @@ import { Console } from "./Console";
 import { StatCards } from "./StatCards";
 import { LeakTable } from "./LeakTable";
 import { toast, Toaster } from "sonner";
-import { GitBranch, Upload, Play, ShieldCheck } from "lucide-react";
+import { GitBranch, Upload, Play, Leaf, Sparkles } from "lucide-react";
 
 type Mode = "precommit" | "full";
 
@@ -41,7 +41,7 @@ export function ScanHub() {
           setFilesScanned(mode === "precommit" ? 14 : 1287);
           setFalsePositives(mode === "precommit" ? 3 : 27);
           setRunning(false);
-          toast.success(`Scan complete — ${results.length} secrets detected`);
+          toast.success(`Scan complete — ${results.length} secrets surfaced`);
         }
       }, 550 * (i + 1));
       timers.current.push(t);
@@ -81,54 +81,98 @@ export function ScanHub() {
   const onUpload = () => toast("Mock upload accepted — 12 files staged");
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
-      <Toaster theme="dark" position="bottom-right" />
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      <Toaster position="bottom-right" />
+
+      {/* Ambient botanical background */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(60% 40% at 85% 0%, oklch(0.92 0.06 25 / 0.5), transparent 60%), radial-gradient(50% 50% at 0% 30%, oklch(0.9 0.07 155 / 0.4), transparent 60%), radial-gradient(40% 40% at 100% 100%, oklch(0.9 0.07 145 / 0.35), transparent 60%)",
+        }}
+      />
+      <Leaf
+        aria-hidden
+        className="absolute -top-6 -left-6 w-56 h-56 text-sage/25 -rotate-12"
+        strokeWidth={0.6}
+      />
+      <Leaf
+        aria-hidden
+        className="absolute top-40 right-0 w-72 h-72 text-leaf/20 rotate-45"
+        strokeWidth={0.5}
+      />
+      <Leaf
+        aria-hidden
+        className="absolute bottom-10 left-1/4 w-64 h-64 text-sage/15 -rotate-45"
+        strokeWidth={0.5}
+      />
 
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="relative">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-600 flex items-center justify-center shadow-lg">
-              <ShieldCheck className="w-5 h-5 text-white" />
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[oklch(0.75_0.11_155)] to-[oklch(0.55_0.13_150)] flex items-center justify-center soft-shadow">
+              <Leaf className="w-5 h-5 text-white" strokeWidth={2.2} />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">GitLeak Sentinel</h1>
-              <p className="text-xs text-muted-foreground">Secret scanner & leak detector</p>
+              <h1 className="text-xl font-display font-semibold tracking-tight">
+                Verdant Sentinel
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                a calm secret scanner for your git garden
+              </p>
             </div>
           </div>
-          <span className="text-xs font-mono text-muted-foreground hidden sm:block">
-            v1.0.0 · mock-mode
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground bg-white/60 backdrop-blur px-3 py-1.5 rounded-full border border-border/40">
+            <span className="w-1.5 h-1.5 rounded-full bg-sage" />
+            v1.0 · mock-mode
           </span>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Scan Hub */}
-        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <GitBranch className="w-4 h-4 text-emerald-400" />
-            <h2 className="font-semibold">Scan Hub</h2>
+      <main className="relative max-w-6xl mx-auto px-6 pb-16 space-y-10">
+        {/* Hero + Scan Hub */}
+        <section className="rounded-[2rem] bg-card/80 backdrop-blur-sm border border-border/40 soft-shadow p-8 md:p-10">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-sage-deep mb-4">
+            <Sparkles className="w-3.5 h-3.5" /> Scan Hub
           </div>
+          <h2 className="font-display text-3xl md:text-4xl leading-tight max-w-2xl">
+            Grow safer repos. <span className="text-sage-deep italic">Uproot</span> leaked
+            secrets before they bloom.
+          </h2>
+          <p className="text-muted-foreground mt-3 max-w-xl text-sm">
+            Point Sentinel at a repository or drop in files. It quietly checks
+            history, entropy, and known signatures — then hands you a tidy triage.
+          </p>
 
-          <div className="grid md:grid-cols-[1fr_auto] gap-3">
-            <Input
-              placeholder="https://github.com/org/repo"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="font-mono text-sm"
-            />
-            <Button variant="outline" onClick={onUpload}>
+          <div className="mt-8 grid md:grid-cols-[1fr_auto] gap-3">
+            <div className="relative">
+              <GitBranch className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="https://github.com/org/repo"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="pl-11 h-12 rounded-full bg-white/80 border-border/50 font-mono text-sm"
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={onUpload}
+              className="h-12 rounded-full border-border/50 bg-white/70 hover:bg-white"
+            >
               <Upload className="w-4 h-4 mr-2" /> Upload files
             </Button>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-4">
-            <div className="inline-flex rounded-lg border border-border bg-muted/30 p-1">
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="inline-flex rounded-full bg-[oklch(0.94_0.02_90)] p-1 border border-border/40">
               <button
                 onClick={() => setMode("precommit")}
-                className={`px-4 py-1.5 text-sm rounded-md transition-all ${
+                className={`px-4 py-2 text-sm rounded-full transition-all ${
                   mode === "precommit"
-                    ? "bg-emerald-500/20 text-emerald-300 font-medium"
+                    ? "bg-white text-sage-deep font-medium soft-shadow"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -136,9 +180,9 @@ export function ScanHub() {
               </button>
               <button
                 onClick={() => setMode("full")}
-                className={`px-4 py-1.5 text-sm rounded-md transition-all ${
+                className={`px-4 py-2 text-sm rounded-full transition-all ${
                   mode === "full"
-                    ? "bg-sky-500/20 text-sky-300 font-medium"
+                    ? "bg-white text-sage-deep font-medium soft-shadow"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -149,7 +193,7 @@ export function ScanHub() {
             <Button
               onClick={startScan}
               disabled={running}
-              className="bg-gradient-to-r from-emerald-500 to-sky-600 hover:opacity-90 text-white ml-auto"
+              className="ml-auto h-12 px-6 rounded-full bg-gradient-to-r from-[oklch(0.65_0.13_155)] to-[oklch(0.55_0.13_145)] hover:opacity-90 text-white soft-shadow"
             >
               <Play className="w-4 h-4 mr-2" />
               {running ? "Scanning..." : "Start Scan"}
@@ -162,16 +206,21 @@ export function ScanHub() {
 
         {/* Triage Dashboard */}
         <section className="space-y-4">
-          <h2 className="font-semibold">Smart Triage Dashboard</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl">Triage Garden</h2>
+            <span className="text-xs text-muted-foreground">
+              live counts update as findings evolve
+            </span>
+          </div>
           <StatCards filesScanned={filesScanned} leaks={leaks} falsePositives={falsePositives} />
         </section>
 
         {/* Leak Table */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Detected Leaks</h2>
+            <h2 className="font-display text-xl">Detected Leaks</h2>
             <span className="text-xs text-muted-foreground">
-              Verify runs a TruffleHog-style live API probe (mocked)
+              Verify runs a TruffleHog-style live probe (mocked)
             </span>
           </div>
           <LeakTable leaks={leaks} onFix={onFix} onIgnore={onIgnore} onVerify={onVerify} />
