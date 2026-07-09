@@ -1,12 +1,17 @@
 import type { Leak, Severity } from "./mock-data";
 
+export interface FileSource {
+  path: string;
+  content: string;
+  size: number;
+}
+
 interface Detector {
   type: string;
   severity: Severity;
   regex: RegExp;
 }
 
-// Signature-based detectors. Tuned to avoid matching generic prose.
 const DETECTORS: Detector[] = [
   { type: "AWS Access Key", severity: "Critical", regex: /\b(AKIA|ASIA)[0-9A-Z]{16}\b/g },
   { type: "Google API Key", severity: "Critical", regex: /\bAIza[0-9A-Za-z_-]{35}\b/g },
@@ -21,9 +26,14 @@ const DETECTORS: Detector[] = [
   { type: "JWT Token", severity: "Warning", regex: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g },
 ];
 
-// Text-file extensions we're willing to peek at.
 const TEXT_EXT = /\.(ts|tsx|js|jsx|mjs|cjs|json|env|sh|bash|zsh|yml|yaml|toml|ini|cfg|conf|md|txt|py|rb|go|rs|java|kt|swift|php|cs|xml|html|css|sql|pem|key)$/i;
 const ENV_LIKE = /(^|\/)\.env(\..+)?$|(^|\/)config\.(json|ya?ml)$/i;
+const MAX_FILE_BYTES = 512 * 1024;
+
+export function isScannable(path: string, size: number, mime = ""): boolean {
+  if (size > MAX_FILE_BYTES) return false;
+  return TEXT_EXT.test(path) || ENV_LIKE.test(path) || mime.startsWith("text/");
+}
 
 function mask(s: string) {
   if (s.length <= 10) return s.slice(0, 3) + "•".repeat(Math.max(1, s.length - 3));
@@ -41,55 +51,35 @@ function shannonEntropy(s: string) {
   return h;
 }
 
-export interface ScanOutcome {
+export interface DetectionResult {
   leaks: Leak[];
-  filesScanned: number;
-  bytesScanned: number;
   falsePositives: number;
 }
 
-export async function scanFiles(files: File[]): Promise<ScanOutcome> {
+export function detect(sources: FileSource[], author = "local"): DetectionResult {
   const leaks: Leak[] = [];
-  let filesScanned = 0;
-  let bytesScanned = 0;
   let falsePositives = 0;
   let idc = 0;
 
-  for (const file of files) {
-    const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
-    const isText = TEXT_EXT.test(path) || ENV_LIKE.test(path) || file.type.startsWith("text/");
-    if (!isText) continue;
-    if (file.size > 512 * 1024) continue; // skip big blobs
-    filesScanned++;
-    bytesScanned += file.size;
-
-    let text: string;
-    try {
-      text = await file.text();
-    } catch {
-      continue;
-    }
-
-    const lines = text.split(/\r?\n/);
+  for (const src of sources) {
+    const lines = src.content.split(/\r?\n/);
     const seen = new Set<string>();
 
     for (const d of DETECTORS) {
       d.regex.lastIndex = 0;
       let m: RegExpExecArray | null;
-      while ((m = d.regex.exec(text)) !== null) {
+      while ((m = d.regex.exec(src.content)) !== null) {
         const raw = m[0];
         const key = d.type + ":" + raw;
         if (seen.has(key)) continue;
         seen.add(key);
 
-        // entropy check on tail of the match — filters obvious placeholders
         const tail = raw.slice(-20);
         if (shannonEntropy(tail) < 2.5) {
           falsePositives++;
           continue;
         }
 
-        // find the line number of the first occurrence
         let lineNo = 1;
         let acc = 0;
         for (let i = 0; i < lines.length; i++) {
@@ -101,10 +91,10 @@ export async function scanFiles(files: File[]): Promise<ScanOutcome> {
         }
 
         leaks.push({
-          id: "u" + ++idc,
-          file: path,
+          id: "f" + ++idc,
+          file: src.path,
           line: lineNo,
-          author: "local (uploaded)",
+          author,
           severity: d.severity,
           type: d.type,
           masked: mask(raw),
@@ -116,5 +106,5 @@ export async function scanFiles(files: File[]): Promise<ScanOutcome> {
     }
   }
 
-  return { leaks, filesScanned, bytesScanned, falsePositives };
+  return { leaks, falsePositives };
 }
