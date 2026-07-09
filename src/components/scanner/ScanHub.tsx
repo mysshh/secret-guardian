@@ -118,7 +118,7 @@ export function ScanHub() {
     }, 1200);
   };
 
-  const onUpload = () => toast("Mock upload accepted — 12 files staged");
+  
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
