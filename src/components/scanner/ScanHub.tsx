@@ -1,12 +1,13 @@
 import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MOCK_LEAKS, SCAN_STEPS, type Leak } from "@/lib/mock-data";
+import { SCAN_STEPS, type Leak } from "@/lib/mock-data";
+import { scanFiles } from "@/lib/scanner";
 import { Console } from "./Console";
 import { StatCards } from "./StatCards";
 import { LeakTable } from "./LeakTable";
 import { toast, Toaster } from "sonner";
-import { GitBranch, Upload, Play, Leaf, Sparkles } from "lucide-react";
+import { GitBranch, Upload, Play, Leaf, Sparkles, X } from "lucide-react";
 
 type Mode = "precommit" | "full";
 
@@ -18,9 +19,21 @@ export function ScanHub() {
   const [leaks, setLeaks] = useState<Leak[]>([]);
   const [filesScanned, setFilesScanned] = useState(0);
   const [falsePositives, setFalsePositives] = useState(0);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const fileInput = useRef<HTMLInputElement>(null);
 
-  const startScan = useCallback(() => {
+  const runSteps = (steps: string[], onDone: () => void) => {
+    steps.forEach((step, i) => {
+      const t = setTimeout(() => {
+        setLines((prev) => [...prev, step]);
+        if (i === steps.length - 1) onDone();
+      }, 380 * (i + 1));
+      timers.current.push(t);
+    });
+  };
+
+  const startScan = useCallback(async () => {
     if (running) return;
     timers.current.forEach(clearTimeout);
     setRunning(true);
@@ -32,21 +45,48 @@ export function ScanHub() {
     const steps =
       mode === "precommit" ? SCAN_STEPS.slice(0, 4).concat(SCAN_STEPS.slice(5)) : SCAN_STEPS;
 
-    steps.forEach((step, i) => {
-      const t = setTimeout(() => {
-        setLines((prev) => [...prev, step]);
-        if (i === steps.length - 1) {
-          const results = mode === "precommit" ? MOCK_LEAKS.slice(0, 3) : MOCK_LEAKS;
-          setLeaks(results);
-          setFilesScanned(mode === "precommit" ? 14 : 1287);
-          setFalsePositives(mode === "precommit" ? 3 : 27);
+    if (pendingFiles.length > 0) {
+      const result = await scanFiles(pendingFiles);
+      runSteps(
+        [
+          `Reading ${pendingFiles.length} uploaded file(s)...`,
+          ...steps.slice(2, -1),
+          `Scanned ${result.filesScanned} text file(s), ${(result.bytesScanned / 1024).toFixed(1)} KB.`,
+          "Scan complete.",
+        ],
+        () => {
+          setLeaks(result.leaks);
+          setFilesScanned(result.filesScanned);
+          setFalsePositives(result.falsePositives);
           setRunning(false);
-          toast.success(`Scan complete — ${results.length} secrets surfaced`);
-        }
-      }, 550 * (i + 1));
-      timers.current.push(t);
+          if (result.leaks.length === 0) toast.success("All clear — no secrets detected 🌿");
+          else toast.success(`Scan complete — ${result.leaks.length} secret(s) surfaced`);
+        },
+      );
+      return;
+    }
+
+    runSteps(steps, () => {
+      setLeaks([]);
+      setFilesScanned(0);
+      setFalsePositives(0);
+      setRunning(false);
+      toast("Remote clone runs server-side. Upload files here to scan locally.", { duration: 5000 });
     });
-  }, [mode, running]);
+  }, [mode, running, pendingFiles]);
+
+  const onUpload = () => fileInput.current?.click();
+  const onFilesPicked = (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const arr = Array.from(list);
+    setPendingFiles(arr);
+    toast.success(`${arr.length} file(s) staged — press Start Scan`);
+  };
+  const clearFiles = () => {
+    setPendingFiles([]);
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
 
   const onFix = (id: string) => {
     setLeaks((prev) =>
