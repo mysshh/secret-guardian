@@ -202,9 +202,33 @@ export function ScanHub() {
               onClick={onUpload}
               className="h-12 rounded-full border-border/50 bg-white/70 hover:bg-white"
             >
-              <Upload className="w-4 h-4 mr-2" /> Upload files
+              <Upload className="w-4 h-4 mr-2" />
+              {pendingFiles.length > 0 ? `${pendingFiles.length} file(s) staged` : "Upload files"}
             </Button>
+            <input
+              ref={fileInput}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => onFilesPicked(e.target.files)}
+            />
           </div>
+
+          {pendingFiles.length > 0 && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-mono truncate max-w-md">
+                {pendingFiles.slice(0, 3).map((f) => f.name).join(", ")}
+                {pendingFiles.length > 3 ? ` +${pendingFiles.length - 3} more` : ""}
+              </span>
+              <button
+                onClick={clearFiles}
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 hover:bg-blush/40"
+              >
+                <X className="w-3 h-3" /> clear
+              </button>
+            </div>
+          )}
+
 
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <div className="inline-flex rounded-full bg-[oklch(0.94_0.02_90)] p-1 border border-border/40">
