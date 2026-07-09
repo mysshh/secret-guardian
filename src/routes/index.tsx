@@ -10,10 +10,10 @@ export const Route = createFileRoute("/")({
         content:
           "Scan Git repositories for leaked API keys, tokens, and secrets. Entropy analysis, live verification, and auto-remediation.",
       },
-      { property: "og:title", content: "GitLeak Sentinel — Secret Scanner" },
+      { property: "og:title", content: "GitLeak Sentinel — Git Secret Scanner & Leak Detector" },
       {
         property: "og:description",
-        content: "Detect leaked secrets across Git history with smart triage and auto-fix.",
+        content: "Scan Git repositories for leaked API keys, tokens, and secrets. Entropy analysis, live verification, and auto-remediation.",
       },
     ],
   }),
