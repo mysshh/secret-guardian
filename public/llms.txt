@@ -1,0 +1,9 @@
+# Verdant Sentinel
+
+> A calm Git secret scanner and leak detector. Scan public GitHub repositories or upload a ZIP / loose files to surface leaked API keys, tokens, and credentials with entropy analysis, live verification, and one-click remediation.
+
+Verdant Sentinel runs the same detection engine on remote repositories fetched by URL and on local uploads scanned in-browser. Findings include severity triage, masked previews, live status checks, and auto-fix suggestions that swap secrets for environment variables.
+
+## Pages
+
+- [Home](/): Scan hub, animated console, triage dashboard, and detected leaks table.

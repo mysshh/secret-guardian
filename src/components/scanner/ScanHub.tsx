@@ -154,7 +154,9 @@ export function ScanHub() {
               <Leaf className="w-5 h-5 text-white" strokeWidth={2.2} />
             </div>
             <div>
-              <h1 className="text-xl font-display font-semibold tracking-tight">Verdant Sentinel</h1>
+              <h1 className="text-xl font-display font-semibold tracking-tight">
+                Verdant Sentinel — Git Secret Scanner &amp; Leak Detector
+              </h1>
               <p className="text-xs text-muted-foreground">a calm secret scanner for your git garden</p>
             </div>
           </div>
@@ -179,6 +181,7 @@ export function ScanHub() {
             <div className="relative">
               <GitBranch className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
+                aria-label="GitHub repository URL"
                 placeholder="https://github.com/org/repo"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
