@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://secret-guardian-lite.lovable.app/sitemap.xml
