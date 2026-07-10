@@ -181,6 +181,7 @@ export function ScanHub() {
             <div className="relative">
               <GitBranch className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
+                aria-label="GitHub repository URL"
                 placeholder="https://github.com/org/repo"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
