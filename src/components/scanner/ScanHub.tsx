@@ -154,7 +154,9 @@ export function ScanHub() {
               <Leaf className="w-5 h-5 text-white" strokeWidth={2.2} />
             </div>
             <div>
-              <h1 className="text-xl font-display font-semibold tracking-tight">Verdant Sentinel</h1>
+              <h1 className="text-xl font-display font-semibold tracking-tight">
+                Verdant Sentinel — Git Secret Scanner &amp; Leak Detector
+              </h1>
               <p className="text-xs text-muted-foreground">a calm secret scanner for your git garden</p>
             </div>
           </div>
