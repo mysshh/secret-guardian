@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as ApiPublicFetchRepoRouteImport } from './routes/api/public/fetch-repo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicFetchRepoRoute = ApiPublicFetchRepoRouteImport.update({
@@ -25,27 +31,31 @@ const ApiPublicFetchRepoRoute = ApiPublicFetchRepoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/api/public/fetch-repo': typeof ApiPublicFetchRepoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/api/public/fetch-repo': typeof ApiPublicFetchRepoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/api/public/fetch-repo': typeof ApiPublicFetchRepoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/fetch-repo'
+  fullPaths: '/' | '/sitemap/xml' | '/api/public/fetch-repo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/fetch-repo'
-  id: '__root__' | '/' | '/api/public/fetch-repo'
+  to: '/' | '/sitemap/xml' | '/api/public/fetch-repo'
+  id: '__root__' | '/' | '/sitemap/xml' | '/api/public/fetch-repo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
   ApiPublicFetchRepoRoute: typeof ApiPublicFetchRepoRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/fetch-repo': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
   ApiPublicFetchRepoRoute: ApiPublicFetchRepoRoute,
 }
 export const routeTree = rootRouteImport
