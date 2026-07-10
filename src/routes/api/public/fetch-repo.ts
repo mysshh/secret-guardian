@@ -16,12 +16,38 @@ export const Route = createFileRoute("/api/public/fetch-repo")({
         const suffix = ref ? `/${encodeURIComponent(ref)}` : "";
         const ghUrl = `https://api.github.com/repos/${owner}/${repo}/zipball${suffix}`;
 
-        const headers: Record<string, string> = {
+        const baseHeaders: Record<string, string> = {
           "User-Agent": "verdant-sentinel-scanner",
           Accept: "application/vnd.github+json",
         };
         const token = process.env.GITHUB_TOKEN;
-        if (token) headers.Authorization = `Bearer ${token}`;
+
+        // Only attach the server token AFTER confirming the target repo is public.
+        // Otherwise this endpoint would become a confused-deputy proxy able to
+        // exfiltrate private repos the token can access.
+        const headers: Record<string, string> = { ...baseHeaders };
+        if (token) {
+          try {
+            const metaRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+              headers: { ...baseHeaders, Authorization: `Bearer ${token}` },
+            });
+            if (!metaRes.ok) {
+              const text = await metaRes.text().catch(() => "");
+              return new Response(
+                `GitHub responded ${metaRes.status}: ${text.slice(0, 300) || metaRes.statusText}`,
+                { status: metaRes.status === 404 ? 404 : 502 },
+              );
+            }
+            const meta = (await metaRes.json()) as { private?: boolean; visibility?: string };
+            const isPublic = meta.private === false && (!meta.visibility || meta.visibility === "public");
+            if (!isPublic) {
+              return new Response("Repository is not public", { status: 403 });
+            }
+            headers.Authorization = `Bearer ${token}`;
+          } catch (err) {
+            return new Response(`Upstream fetch failed: ${(err as Error).message}`, { status: 502 });
+          }
+        }
 
         let upstream: Response;
         try {
@@ -29,6 +55,7 @@ export const Route = createFileRoute("/api/public/fetch-repo")({
         } catch (err) {
           return new Response(`Upstream fetch failed: ${(err as Error).message}`, { status: 502 });
         }
+
 
         if (!upstream.ok) {
           const text = await upstream.text().catch(() => "");
